@@ -1,0 +1,23 @@
+{
+  "name": "tinyapp",
+  "version": "1.0.0",
+  "description": "A tinyapp for tiny people.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sonofarobin/tinyapp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sonofarobin/tinyapp/issues"
+  },
+  "homepage": "https://github.com/Sonofarobin/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
