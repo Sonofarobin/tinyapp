@@ -65,3 +65,8 @@ app.get(`/u/:shortURL`, (req, res) => {
   res.redirect(`http://${urlDatabase[shortcut]}`)
   console.log(shortcut + urlDatabase[shortcut]);
 });
+
+app.post(`/urls/:shortURL/delete`,(req, res) => {
+delete urlDatabase[req.params.shortURL];
+res.redirect(`/urls`)
+});
