@@ -3,6 +3,28 @@ const cookieParser = require('cookie-parser')
 const app = express();
 const PORT = 8080; // default port 8080
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
+function getUserByEmail(email, database) {
+  for (let key in database){
+if (email === database[key][`email`]) {
+  return database[key][`id`];
+   }
+  }
+  return undefined;
+}
+
 function makeid(length) {
   var result = '';
   var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -42,19 +64,19 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase};
-  if (req.cookies.username) {
-    templateVars.username = req.cookies.username
+  if (req.cookies.userid) {
+    templateVars.user = users[req.cookies.userid]
   }
   console.log(`logging cookie`, req.cookies);
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new", templateVars = {username: req.cookies.username});
+  res.render("urls_new", templateVars = {user: users[req.cookies.userid]});
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies.username };
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[req.cookies.userid] };
   console.log([req.params]);
   res.render("urls_show", templateVars);
 });
@@ -90,6 +112,27 @@ app.post(`/login`, (req, res) => {
 });
 
 app.post(`/logout`, (req, res) => {
-  res.clearCookie(`username`);
+  res.clearCookie(`userid`);
   res.redirect(`/urls`);
+});
+
+app.post(`/register`, (req, res) => {
+  let randomid = generateRandomString();
+  users[randomid] = {
+    id : randomid,
+    email : req.body.email,
+    password : req.body.password
+  }
+  res.cookie(`userid`, randomid);
+  console.log(users[randomid]);
+  console.log(users);
+  if (req.body.email === "" || req.body.password === "" || !getUserByEmail(req.body.email, users)) {
+    res.status(404).send('Please enter a valid and non pre-existing ')
+  }
+  res.redirect(`/urls`);
+});
+
+app.get(`/register`, (req, res) => {
+  let templateVars = {user : users[req.cookies.userid]};
+  res.render(`registration`, templateVars);
 });

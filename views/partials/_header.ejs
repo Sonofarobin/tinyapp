@@ -11,8 +11,8 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         <form class="form-inline" action="/login" method="POST">
           <div class="form-group mb-2" style="margin: 0 auto">
-            <% if(username && username !== 'undefined'){ %>
-              <label>You are logged in as: <%= username  %></label>
+            <% if(user && user.email !== 'undefined'){ %>
+              <label>You are logged in as: <%= user.email  %></label>
               <button type="submit" class="btn btn-primary" method="POST" action="/logout" >Logout</button>
             <% } else{ %>
               <label for="longURL">Create an account:</label>
