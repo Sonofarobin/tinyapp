@@ -71,10 +71,7 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase};
-  if (req.cookies.userid) {
-    templateVars.user = users[req.cookies.userid]
-  }
+  let templateVars = { urls: urlDatabase, user : users[req.cookies.userid]};
   console.log(`logging cookie`, req.cookies);
   res.render("urls_index", templateVars);
 });
@@ -145,16 +142,29 @@ app.get(`/login`, (req, res) => {
 res.render(`login`, templateVars = {user : users[req.cookies.userid]});
 });
 
-//app.post(`/login`, (req, res) => {
+app.post(`/login`, (req, res) => {
+  if (!req.body.userid || !req.body.password) {
+    res.status(404).send(`Please ensure both fields are filled.`)
+  };
+  if (getUserByEmail(req.body.email, users) = undefined) {
+    res.status(404).send(`That is not a registered email address.`)
+  } else {
+    userid = getUserByEmail(req.body.email);
+  };
+  if (users[userid][`password`] === req.body.password) {
+    res.cookie(`userid`, users[userid]);
+  } else {
+    res.status(404).send(`Wrong password!`);
+  };
+});
 
-if (!req.body.username || !req.body.password) {
- res.status(404).send()
-}
+
+//getUserByEmail(req.body.email,users) 
 
 
 
 
 
-res.cookie(`userid`, users[]);
-res.redirect(`/urls`);
+//res.cookie(`userid`, users[]);
+//res.redirect(`/urls`);
 //});
