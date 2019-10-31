@@ -25,6 +25,14 @@ if (email === database[key][`email`]) {
   return undefined;
 }
 
+function matchPassword(actual,expected) {
+  if (expected === actual) {
+    return actual;
+  } else {
+    return false;
+  }
+}
+
 function makeid(length) {
   var result = '';
   var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -106,10 +114,6 @@ app.post(`/urls/:shortURL`, (req, res) => {
   res.redirect(`/urls`);
 });
 
-app.post(`/login`, (req, res) => {
-  res.cookie(`username`, req.body[`username`]);
-  res.redirect(`/urls`);
-});
 
 app.post(`/logout`, (req, res) => {
   res.clearCookie(`userid`);
@@ -127,7 +131,7 @@ app.post(`/register`, (req, res) => {
   console.log(users[randomid]);
   console.log(users);
   if (req.body.email === "" || req.body.password === "" || !getUserByEmail(req.body.email, users)) {
-    res.status(404).send('Please enter a valid and non pre-existing ')
+    res.status(404).send('Please enter a valid and non pre-existing email')
   }
   res.redirect(`/urls`);
 });
@@ -136,3 +140,21 @@ app.get(`/register`, (req, res) => {
   let templateVars = {user : users[req.cookies.userid]};
   res.render(`registration`, templateVars);
 });
+
+app.get(`/login`, (req, res) => {
+res.render(`login`, templateVars = {user : users[req.cookies.userid]});
+});
+
+//app.post(`/login`, (req, res) => {
+
+if (!req.body.username || !req.body.password) {
+ res.status(404).send()
+}
+
+
+
+
+
+res.cookie(`userid`, users[]);
+res.redirect(`/urls`);
+//});
