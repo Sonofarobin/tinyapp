@@ -93,7 +93,7 @@ app.post("/urls", (req, res) => {
 app.get(`/u/:shortURL`, (req, res) => {
   const shortcut = req.params.shortURL;
   if (!urlDatabase[shortcut]) {
-    res.status(404).send(`<h1>TinyURL not found in database, screw you.</h1>`)
+    res.status(404).send(`<h1>TinyURL not found in database.</h1>`)
   }
   res.redirect(urlDatabase[shortcut].longURL);
   //console.log(shortcut + urlDatabase[shortcut]);
