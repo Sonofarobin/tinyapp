@@ -3,9 +3,7 @@ const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const bodyParser = require("body-parser");
 const {
-  matchPassword,
   generateRandomString,
-  makeid,
   urlsForUser,
   getUserByEmail
 } = require(`./helpers`);
@@ -77,7 +75,6 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.session.userid] };
-  console.log([`-------------` + req.params]);
   res.render("urls_show", templateVars);
 });
 
@@ -96,7 +93,6 @@ app.get(`/u/:shortURL`, (req, res) => {
     res.status(404).send(`<h1>TinyURL not found in database.</h1>`)
   }
   res.redirect(urlDatabase[shortcut].longURL);
-  //console.log(shortcut + urlDatabase[shortcut]);
 });
 
 app.post(`/urls/:shortURL/delete`,(req, res) => {
@@ -109,10 +105,15 @@ app.post(`/urls/:shortURL/delete`,(req, res) => {
 });
 
 app.post(`/urls/:shortURL`, (req, res) => {
-  shortURL = req.params.shortURL;
-  urlDatabase[shortURL].longURL = req.body.longURL
-  console.log(`***** URL DATABASE ******`)
-  res.redirect(`/urls`);
+  if (urlsForUser(req.session.userid, urlDatabase)[req.params.shortURL]) {
+    shortURL = req.params.shortURL;
+    urlDatabase[shortURL].longURL = req.body.longURL
+    res.redirect(`/urls`);
+  } else {
+    res.status(404).send(`You are not the owner of this shortURL. Login to edit or delete`);
+  };
+  //FEATURE: Allows users whether signed in or not to access the page, however any attempt to edit the url will result in an error.
+  
 });
 
 app.post(`/logout`, (req, res) => {
@@ -127,9 +128,8 @@ app.post(`/register`, (req, res) => {
     res.redirect(`/login`);
     return;
   }
+ //Users must register before they are able to login
   
-  console.log(users[randomid]);
-  console.log(users);
   if (req.body.email === "" || req.body.password === "" ) {
     res.status(404).send('Please enter a valid and non pre-existing email')
     return;
@@ -152,6 +152,7 @@ app.get(`/login`, (req, res) => {
 res.render(`login`, templateVars = {user : users[req.session.userid]});
 });
 
+
 app.post(`/login`, (req, res) => {
   let user = getUserByEmail(req.body.email, users);
   if (!req.body.email || !req.body.password) {
@@ -169,16 +170,5 @@ app.post(`/login`, (req, res) => {
 });
 
 
-//getUserByEmail(req.body.email,users) 
-
-
-
-
-
-//res.cookie(`userid`, users[]);
-//res.redirect(`/urls`);
-//});
-
-
-// bugs to fix = edit a link deletes it, edit link pasge displays {object, object} instead of longURL
+// FEATURE : Logged in users can view other users edit url pages, but cannot make chages to them.
 //

@@ -9,7 +9,7 @@ if (email === database[key].email) {
 
 function urlsForUser(userid, urldatabase) {
   let userURLs = {}
-  for (url in urldatabase) {
+  for (let url in urldatabase) {
     if (urldatabase[url].userid === userid) {
       userURLs[url] = urldatabase[url];
     }
@@ -31,18 +31,9 @@ function generateRandomString() {
   return makeid(6);
 }
 
-function matchPassword(actual,expected) {
-  if (expected === actual) {
-    return actual;
-  } else {
-    return false;
-  }
-}
 
 module.exports = {
-  matchPassword,
   generateRandomString,
-  makeid,
   urlsForUser,
   getUserByEmail
 };
