@@ -1,8 +1,18 @@
 const express = require("express");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
+const bodyParser = require("body-parser");
+const {
+  matchPassword,
+  generateRandomString,
+  makeid,
+  urlsForUser,
+  getUserByEmail
+} = require(`./helpers`);
+
 const app = express();
 const PORT = 8080; // default port 8080
+
 
 const users = { 
   "userRandomID": {
@@ -23,55 +33,23 @@ const urlDatabase = {
 };
 
 
-function urlsForUser(userid) {
-let userURLs = {}
-for (url in urlDatabase) {
-  if (urlDatabase[url].userid === userid) {
-    userURLs[url] = urlDatabase[url];
-  }
-}
- return userURLs;
-}
-
-function getUserByEmail(email, database) {
-  for (let key in database){
-if (email === database[key].email) {
-  return database[key];
-   }
-  }
-  return undefined;
-}
-
-function matchPassword(actual,expected) {
-  if (expected === actual) {
-    return actual;
-  } else {
-    return false;
-  }
-}
-
-function makeid(length) {
-  var result = '';
-  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var charactersLength = characters.length;
-  for ( var i = 0; i < length; i++ ) {
-     result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-}
-
-function generateRandomString() {
-  return makeid(6);
-}
-
 app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
  }));
+ 
+ app.use('/urls', function (req, res, next) {
+   if (!req.session.userid) {
+     res.redirect('/login');
+   } else {
+     next();
+   }
+ });
 
 
-app.get("/", (req, res) => {
+ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
@@ -79,23 +57,12 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
-
-app.use('/urls', function (req, res, next) {
-  if (!req.session.userid) {
-    res.redirect('/login');
-  } else {
-    next();
-  }
-});
-
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
 app.get("/urls", (req, res) => {
-  let filteredURLS = urlsForUser(req.session.userid);
+  let filteredURLS = urlsForUser(req.session.userid, urlDatabase);
   let templateVars = { urls: filteredURLS, user : users[req.session.userid]};
   res.render("urls_index", templateVars);
 });
@@ -109,8 +76,8 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[req.session.userid] };
-  console.log([req.params]);
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.session.userid] };
+  console.log([`-------------` + req.params]);
   res.render("urls_show", templateVars);
 });
 
@@ -125,8 +92,11 @@ app.post("/urls", (req, res) => {
 
 app.get(`/u/:shortURL`, (req, res) => {
   const shortcut = req.params.shortURL;
-  res.redirect(`http://${urlDatabase[shortcut]}`)
-  console.log(shortcut + urlDatabase[shortcut]);
+  if (!urlDatabase[shortcut]) {
+    res.status(404).send(`<h1>TinyURL not found in database, screw you.</h1>`)
+  }
+  res.redirect(urlDatabase[shortcut].longURL);
+  //console.log(shortcut + urlDatabase[shortcut]);
 });
 
 app.post(`/urls/:shortURL/delete`,(req, res) => {
@@ -138,13 +108,12 @@ app.post(`/urls/:shortURL/delete`,(req, res) => {
   res.redirect(`/urls`)
 });
 
-
 app.post(`/urls/:shortURL`, (req, res) => {
   shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = req.body.longURL
+  urlDatabase[shortURL].longURL = req.body.longURL
+  console.log(`***** URL DATABASE ******`)
   res.redirect(`/urls`);
 });
-
 
 app.post(`/logout`, (req, res) => {
   req.session = null;
@@ -173,10 +142,6 @@ app.post(`/register`, (req, res) => {
   }
   res.redirect(`/urls`);
 });
-
-
-
-
 
 app.get(`/register`, (req, res) => {
   let templateVars = {user : users[req.session.userid]};
@@ -213,3 +178,7 @@ app.post(`/login`, (req, res) => {
 //res.cookie(`userid`, users[]);
 //res.redirect(`/urls`);
 //});
+
+
+// bugs to fix = edit a link deletes it, edit link pasge displays {object, object} instead of longURL
+//
