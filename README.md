@@ -7,8 +7,9 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["screenshot description"](#)
-!["screenshot description"](#)
+!["This is the homepage users will be brought to upon entering the site"](https://github.com/Sonofarobin/tinyapp/blob/master/docs/Home_Login%20Page.png)
+!["Here is a site member viewing his list of created URLs"](https://github.com/Sonofarobin/tinyapp/blob/master/docs/Urls%20Page.png)
+!["Users whether registered or not can view the edit pages of other users URLs.This is for later implementation of social tinyURLing. Become tinyURL famous!"](https://github.com/Sonofarobin/tinyapp/blob/master/docs/ShortURL_edit%20page.png)
 
 ## Dependencies
 
